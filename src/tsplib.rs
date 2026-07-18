@@ -96,8 +96,8 @@ impl<'a> PointStorage<'a> for InputData {
 impl Default for InputData {
     fn default() -> Self {
         Self {
-            name: "<>".to_owned(),
-            comment: "<>".to_owned(),
+            name: String::new(),
+            comment: String::new(),
             data_type: DataType::Tsp,
             dimension: 0,
             edge_weight_type: EdgeWeightType::Euc2d,
@@ -107,11 +107,11 @@ impl Default for InputData {
 }
 
 impl InputData {
-    pub fn from_str(lines: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn from_str(file: &str) -> Result<Self, Box<dyn Error>> {
         let mut ret = Self::default();
 
-        for line in lines.split('\n') {
-            if line.is_empty() {
+        for line in file.split('\n') {
+            if line.is_empty() || line == "NODE_COORD_SECTION" {
                 continue;
             }
 
@@ -144,10 +144,6 @@ impl InputData {
                 }
             } else {
                 let space_split = line.split(' ').collect::<Vec<&str>>();
-                if space_split.len() == 1 && space_split[0] == "NODE_COORD_SECTION" {
-                    continue;
-                }
-
                 if space_split.len() != 3 {
                     return Err(Box::new(ParseCoordError::new(format!(
                         "Invalid space split (len={}), at: {line}",
