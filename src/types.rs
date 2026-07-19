@@ -40,21 +40,21 @@ impl Tour {
 }
 
 pub struct DistanceMatrix {
-    matrix: Vec<Vec<f32>>,
+    matrix: Vec<f32>,
     n: usize,
 }
 
 impl DistanceMatrix {
     pub fn new(points: &Points) -> Self {
         let n = points.len();
-        let mut matrix = vec![vec![0.0f32; n]; n];
+        let mut matrix = vec![0.0f32; n * n];
         for i in 0..n - 1 {
             for j in i + 1..n {
                 let (x0, y0) = &points[i];
                 let (x1, y1) = &points[j];
                 let dist = ((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1)).sqrt();
-                matrix[i][j] = dist;
-                matrix[j][i] = dist;
+                matrix[i * n + j] = dist;
+                matrix[j * n + i] = dist;
             }
         }
 
@@ -62,31 +62,37 @@ impl DistanceMatrix {
     }
 
     pub fn dist(&self, i: usize, j: usize) -> f32 {
-        self.matrix[i][j]
+        unsafe { *self.matrix.get_unchecked(i * self.n + j) }
     }
 
     pub fn swap_delta(&self, tour: &Tour, i: usize, j: usize) -> f32 {
-        let n = tour.points.len();
-        let i = tour.points[i];
-        let j = tour.points[j];
-        let prev_i = tour.points[(i as i64 - 1 + n as i64) as usize % n];
-        let next_i = tour.points[(i + 1) % n];
-        let prev_j = tour.points[(j as i64 - 1 + n as i64) as usize % n];
-        let next_j = tour.points[(j + 1) % n];
+        unsafe {
+            let n = tour.points.len();
+            let i = *tour.points.get_unchecked(i);
+            let j = *tour.points.get_unchecked(j);
+            let prev_i = *tour
+                .points
+                .get_unchecked((i as i64 - 1 + n as i64) as usize % n);
+            let next_i = *tour.points.get_unchecked((i + 1) % n);
+            let prev_j = *tour
+                .points
+                .get_unchecked((j as i64 - 1 + n as i64) as usize % n);
+            let next_j = *tour.points.get_unchecked((j + 1) % n);
 
-        // eprintln!("{prev_i}, {i}, {next_i} :: {prev_j}, {j}, {next_j}");
+            // eprintln!("{prev_i}, {i}, {next_i} :: {prev_j}, {j}, {next_j}");
 
-        let old_cost = self.dist(prev_i, i)
-            + self.dist(i, next_i)
-            + self.dist(prev_j, j)
-            + self.dist(j, next_j);
-        let new_cost = self.dist(prev_i, j)
-            + self.dist(prev_j, j)
-            + self.dist(next_i, i)
-            + self.dist(i, next_j);
+            let old_cost = self.dist(prev_i, i)
+                + self.dist(i, next_i)
+                + self.dist(prev_j, j)
+                + self.dist(j, next_j);
+            let new_cost = self.dist(prev_i, j)
+                + self.dist(prev_j, j)
+                + self.dist(next_i, i)
+                + self.dist(i, next_j);
 
-        // eprintln!("old={old_cost}, new={new_cost}");
-        new_cost - old_cost
+            // eprintln!("old={old_cost}, new={new_cost}");
+            new_cost - old_cost
+        }
     }
 
     pub fn tour_distance(&self, tour: &[usize]) -> i64 {
