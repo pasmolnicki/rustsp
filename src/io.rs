@@ -27,6 +27,15 @@ pub fn load_problemset_file(file_name: &str) -> Result<String, Box<dyn Error>> {
     )?)
 }
 
+pub fn load_problemset_file_with_base(
+    base_path: &PathBuf,
+    file_name: &str,
+) -> Result<String, Box<dyn Error>> {
+    Ok(std::fs::read_to_string(
+        base_path.join("problemset").join(file_name),
+    )?)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -55,7 +64,7 @@ mod tests {
     #[test]
     fn test_problemset_load_file_loads_existing_tsp_file() {
         let filenames = problemset_filenames().unwrap();
-        let first = filenames.first();
+        let first = filenames.unwrap().first();
         assert!(
             first.is_some(),
             ".tsp files should be present in the problemset directory"

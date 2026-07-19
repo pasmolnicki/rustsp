@@ -39,13 +39,13 @@ impl Tour {
     }
 }
 
-pub(crate) struct DistanceMatrix {
+pub struct DistanceMatrix {
     matrix: Vec<Vec<f32>>,
     n: usize,
 }
 
 impl DistanceMatrix {
-    pub(crate) fn new(points: Points) -> Self {
+    pub fn new(points: &Points) -> Self {
         let n = points.len();
         let mut matrix = vec![vec![0.0f32; n]; n];
         for i in 0..n - 1 {
@@ -61,11 +61,11 @@ impl DistanceMatrix {
         Self { matrix, n }
     }
 
-    pub(crate) fn dist(&self, i: usize, j: usize) -> f32 {
+    pub fn dist(&self, i: usize, j: usize) -> f32 {
         self.matrix[i][j]
     }
 
-    pub(crate) fn swap_delta(&self, tour: &Tour, i: usize, j: usize) -> f32 {
+    pub fn swap_delta(&self, tour: &Tour, i: usize, j: usize) -> f32 {
         let n = tour.points.len();
         let i = tour.points[i];
         let j = tour.points[j];
@@ -89,7 +89,7 @@ impl DistanceMatrix {
         new_cost - old_cost
     }
 
-    pub(crate) fn tour_distance(&self, tour: &[usize]) -> i64 {
+    pub fn tour_distance(&self, tour: &[usize]) -> i64 {
         let mut total = 0f64;
         for i in 0..self.n {
             let next = (i + 1) % self.n;
@@ -107,6 +107,10 @@ pub struct TspSolution {
 impl TspSolution {
     pub fn new(tour: Tour) -> Self {
         Self { tour }
+    }
+
+    pub fn get_tour(&self) -> &Tour {
+        &self.tour
     }
 }
 
@@ -126,7 +130,7 @@ mod tests {
             (4.0f32, 4.0f32),
             (1.0f32, 4.0f32),
         ];
-        let matrix = DistanceMatrix::new(dist);
+        let matrix = DistanceMatrix::new(&dist);
         let tour = Tour::from_perm(&[0, 1, 2, 3]);
         let tour2 = Tour::from_perm(&[0, 1, 3, 2]);
 

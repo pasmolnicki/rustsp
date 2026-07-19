@@ -11,11 +11,11 @@ pub fn visualize(
     points: &Points,
     file_name: String,
 ) -> Result<PathBuf, Box<dyn Error>> {
-    let tour_points = vec![(0f32, 0f32); tour.points.len()];
+    let mut tour_points = vec![(0f64, 0f64); tour.points.len()];
     tour_points.iter_mut().enumerate().for_each(|(i, (x, y))| {
         let (px, py) = &points[tour.points[i]];
-        *x = *px;
-        *y = *py;
+        *x = *px as f64;
+        *y = *py as f64;
     });
 
     if tour_points.is_empty() {

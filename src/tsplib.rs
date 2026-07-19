@@ -79,12 +79,12 @@ pub enum EdgeWeightType {
 
 #[derive(Debug)]
 pub struct InputData {
-    name: String,
-    comment: String,
-    data_type: DataType,
-    dimension: usize,
-    edge_weight_type: EdgeWeightType,
-    points: types::Points,
+    pub name: String,
+    pub comment: String,
+    pub data_type: DataType,
+    pub dimension: usize,
+    pub edge_weight_type: EdgeWeightType,
+    pub points: types::Points,
 }
 
 impl<'a> PointStorage<'a> for InputData {
@@ -111,7 +111,8 @@ impl InputData {
         let mut ret = Self::default();
 
         for line in file.split('\n') {
-            if line.is_empty() || line == "NODE_COORD_SECTION" {
+            let line = line.trim();
+            if line.is_empty() || line == "NODE_COORD_SECTION" || line == "EOF" {
                 continue;
             }
 
